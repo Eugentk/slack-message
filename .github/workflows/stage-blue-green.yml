@@ -1,0 +1,97 @@
+name: Stage. CI/CD with Blue/Green Deployment
+run-name: ${{ github.actor }} is running GitHub Actions 🚀
+
+on:
+  workflow_dispatch:
+    inputs:
+      software-setup:
+        description: 'Setup/configure required software on EC2 instances (Optional)'
+        default: false
+        type: boolean
+      deployment-env:
+        description: 'Deployment environment'
+        required: true
+        default: 'blue'
+        type: choice
+        options:
+          - blue
+          - green
+      git-ref:
+        description: 'Git Reference (Optional. branch/commit hash)'
+        required: false
+
+env:
+    GIT_BRANCH: main
+    REPO_URL: https://github.com/Eugentk/slack-message
+    SLACK_CHANNEL: deployment
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        name: Build Docker image
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                ref: ${{ env.GIT_BRANCH }}
+              if: github.event.inputs.git-ref == ''
+
+            - name: Checkout Repository (Custom Git Reference)
+              uses: actions/checkout@v4
+              with:
+                ref: ${{ github.event.inputs.git-ref }}
+              if: github.event.inputs.git-ref != ''
+
+            - name: 'Get message'
+              id: 'deploy-message'
+              run: |
+                    echo "::set-output name=commit_msg::$(git log -1 --format=%B)"
+
+            - name: Slack Notification
+              uses: rtCamp/action-slack-notify@v2
+              env:
+                SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+                SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+                SLACK_COLOR: ${{ job.status }}
+                SLACK_FOOTER: 'Powered By SellerAmp'
+                MSG_MINIMAL: true
+                SLACK_ICON_EMOJI: ':rocket:'
+                SLACK_MESSAGE: |
+                    ${{ steps.deploy-message.outputs.commit_msg }}
+                    See details: <${{ env.REPO_URL }}/commit/${{ github.sha }}|(Commit)> <${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
+                SLACK_TITLE: 'Deploy ${{ inputs.git-ref }} to ${{ inputs.deployment-env }} ${{ github.workflow }} by ${{ github.actor }} 🚀'
+                SLACK_USERNAME: Deploy Started
+
+            - name: Build
+              run: echo 'build'
+
+            - name: Deploy
+              run: echo 'deploy'
+
+            - name: Slack Notification Success
+              uses: rtCamp/action-slack-notify@v2
+              if: success()
+              env:
+                SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+                SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+                SLACK_COLOR: ${{ job.status }}
+                SLACK_FOOTER: 'Powered By SellerAmp'
+                MSG_MINIMAL: true
+                SLACK_ICON_EMOJI: ':checkered_flag:'
+                SLACK_MESSAGE: ${{ steps.deploy-message.outputs.commit_msg }}
+                SLACK_TITLE: 'Deploy ${{ inputs.git-ref }} to ${{ inputs.deployment-env }} by ${{ github.actor }} 🚀'
+                SLACK_USERNAME: 'Deploy Successfully Completed'
+
+            - name: Slack Notification Failure
+              uses: rtCamp/action-slack-notify@v2
+              if: failure()
+              env:
+                SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+                SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+                SLACK_COLOR: ${{ job.status }}
+                SLACK_FOOTER: 'Powered By SellerAmp'
+                MSG_MINIMAL: true
+                SLACK_ICON_EMOJI: ':fire:'
+                SLACK_MESSAGE: ${{ steps.deploy-message.outputs.commit_msg }}
+                SLACK_TITLE: 'Deploy ${{ inputs.git-ref }} to ${{ inputs.deployment-env }} by ${{ github.actor }} 🚀'
+                SLACK_USERNAME: 'Deploy Failure'
