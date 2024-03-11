@@ -22,7 +22,8 @@ on:
 
 env:
     GIT_BRANCH: main
-    REPO_URL: ${{ github.repository }}
+    GIT_SERVER_URL: ${{ github.server_url }}
+    GIT_REPO_URL: ${{ github.server_url }}
     SLACK_CHANNEL: deployment
     WORKFLOW_ENV: Stage
 
@@ -62,7 +63,7 @@ jobs:
                 SLACK_ICON_EMOJI: ':rocket:'
                 SLACK_MESSAGE: |
                     ${{ steps.deploy-message.outputs.commit_msg }}
-                    See details: <https://${{ env.REPO_URL }}/commit/${{ steps.deploy-message.outputs.commit_sha }}|(Commit)> <https://${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
+                    See details: <${{ env.GIT_SERVER_URL }}/${{ env.GIT_REPO_URL }}/commit/${{ steps.deploy-message.outputs.commit_sha }}|(Commit)> <${{ env.GIT_SERVER_URL }}/${{ env.GIT_REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
                 SLACK_TITLE: 'Deploy ${{ inputs.git-ref }} to ${{ inputs.deployment-env }} ${{ env.WORKFLOW_ENV }} by ${{ github.actor }} 🚀'
                 SLACK_USERNAME: Deploy Started
 
@@ -84,7 +85,7 @@ jobs:
                 SLACK_ICON_EMOJI: ':checkered_flag:'
                 SLACK_MESSAGE: |
                      ${{ steps.deploy-message.outputs.commit_msg }}
-                     See details: <https://${{ env.REPO_URL }}/commit/${{ steps.deploy-message.outputs.commit_sha }}|(Commit)> <https://${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
+                     See details: <${{ env.GIT_SERVER_URL }}/${{ env.GIT_REPO_URL }}/commit/${{ steps.deploy-message.outputs.commit_sha }}|(Commit)> <${{ env.GIT_SERVER_URL }}/${{ env.GIT_REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
                 SLACK_TITLE: 'Deploy completed ${{ inputs.git-ref }} to ${{ inputs.deployment-env }} ${{ env.WORKFLOW_ENV }} by ${{ github.actor }} 🚀'
                 SLACK_USERNAME: 'Deploy Successfully Completed'
 
@@ -100,6 +101,6 @@ jobs:
                 SLACK_ICON_EMOJI: ':fire:'
                 SLACK_MESSAGE: |
                     ${{ steps.deploy-message.outputs.commit_msg }}
-                    See details: <https://${{ env.REPO_URL }}/commit/${{ steps.deploy-message.outputs.commit_sha }}|(Commit)> <https://${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
+                    See details: <${{ env.GIT_SERVER_URL }}/${{ env.GIT_REPO_URL }}/commit/${{ steps.deploy-message.outputs.commit_sha }}|(Commit)> <${{ env.GIT_SERVER_URL }}/${{ env.GIT_REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
                 SLACK_TITLE: 'Deploy failure ${{ inputs.git-ref }} to ${{ inputs.deployment-env }} ${{ env.WORKFLOW_ENV }} by ${{ github.actor }} 🚀'
                 SLACK_USERNAME: 'Deploy Failure'
