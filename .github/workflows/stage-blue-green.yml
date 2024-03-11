@@ -22,7 +22,7 @@ on:
 
 env:
     GIT_BRANCH: main
-    REPO_URL: https://github.com/Eugentk/slack-message
+    REPO_URL: ${{ github.repository }}
     SLACK_CHANNEL: deployment
     WORKFLOW_ENV: Stage
 
