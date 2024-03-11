@@ -23,7 +23,7 @@ on:
 env:
     GIT_BRANCH: main
     GIT_SERVER_URL: ${{ github.server_url }}
-    GIT_REPO_URL: ${{ github.server_url }}
+    GIT_REPO_URL: ${{ github.repository }}
     SLACK_CHANNEL: deployment
     WORKFLOW_ENV: Stage
 
